@@ -1,4 +1,65 @@
 # resume-analyzer
+# train model code
+# train_model.py
+
+import re
+import pickle
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+
+# ✅ 1. Create a dummy resume dataset directly
+data = {
+    "Resume": [
+        "Experienced data scientist with Python, machine learning, and SQL skills.",
+        "Skilled Java developer with experience in Spring Boot and system design.",
+        "Digital marketer with expertise in SEO, Google Ads, and content writing.",
+        "Finance analyst with knowledge of Excel, risk analysis, and accounting.",
+        "Python developer with experience in Django, Flask, and REST APIs."
+    ],
+    "Category": [
+        "Data Science",
+        "Software Engineering",
+        "Marketing",
+        "Finance",
+        "Software Engineering"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# ✅ 2. Clean the resume text
+def clean_text(text):
+    text = re.sub(r'[^\w\s]', '', text)  # remove punctuation
+    text = re.sub(r'\d+', '', text)      # remove numbers
+    return text.lower()
+
+df['cleaned_resume'] = df['Resume'].apply(clean_text)
+
+# ✅ 3. Prepare features and labels
+X = df['cleaned_resume']
+y = df['Category']
+
+# ✅ 4. Split and train
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# ✅ 5. Create pipeline and train
+pipeline = make_pipeline(
+    TfidfVectorizer(),
+    RandomForestClassifier(n_estimators=100, random_state=42)
+)
+
+pipeline.fit(X_train, y_train)
+
+# ✅ 6. Save the model to a file
+with open("resume_classifier.pkl", "wb") as f:
+    pickle.dump(pipeline, f)
+
+print("✅ Dummy model trained and saved to resume_classifier.pkl")
+
+
 # flask code 
 import os
 import re
